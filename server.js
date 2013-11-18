@@ -47,7 +47,7 @@ var listener = function(request,response) {
     case "/dashboard":
 
         if (request.headers && request.headers.cookie) {
-
+          authorized(request,response,pages.dashboard);
         } else {
           unauthorized(request,response);
         }
