@@ -70,11 +70,13 @@ var setUserCookie = function(response,key,value,expires,http,isSecure,path) {
 /**
  * Render the Unauthorized error page.
  */
-var deny = function(request,response) {
+var deny = function(response) {
 
   response.writeHead(401, {});
 
   response.end(routes.error.unauthorized);
+
+  console.log("Sent Unauthorized to User");
 
 }
 
@@ -181,13 +183,18 @@ module.exports = function(request,response) {
 
         users.authenticate(body.email,body.password, function(error,user) {
 
-          if (error) return console.log("Couldn't authenticate user: " + error);
+          if (!error && user) {
 
-          if (user)
-            redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
-          else
-            deny(request,response);
+            console.log("Authenticated User " + user.email)
 
+            redirectTo(setUserCookie(response,userCookieKey,user.email,true,true),routes.dashboard,"/dashboard");
+          }
+          else {
+
+            console.log("Couldn't authenticate user: " + error);
+
+            deny(response);
+          }
         });
       });
 
@@ -197,11 +204,11 @@ module.exports = function(request,response) {
       if (validCookie(request))
         ok(request,response,routes.dashboard);
       else
-        deny(request,response);
+        deny(response);
 
       break;
     default:
-      deny(request,response);
+      deny(response);
       break;
   }
 }

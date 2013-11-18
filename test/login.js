@@ -10,7 +10,7 @@ describe('login', function() {
   });
 
   var missingData = querystring.stringify({
-    'email': ''
+    'email': 'fdsa'
   });
 
   var loginOptions = {
