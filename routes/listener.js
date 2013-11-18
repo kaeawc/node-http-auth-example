@@ -70,21 +70,12 @@ var setCookie = function(response,key,value,expires,http,isSecure,path) {
 
 var setUserCookie = function(response,user,callback) {
 
-  console.log("creating session for " + user.email);
-
   sessions.create(user.email, function(error, session) {
     
     if (error)
       callback(error,false)
-    else {
-
-      console.log("About to set user cookie:");
-      console.log(session);
-
-      var output = setCookie(response,userCookieKey,JSON.stringify(session),true,true);
-
-      callback(false, output);
-    }
+    else
+      callback(false, setCookie(response,userCookieKey,JSON.stringify(session),true,true));
   });
 }
 
@@ -164,9 +155,11 @@ var getRequestBody = function(request,callback) {
 
 module.exports = function(request,response) {
 
-  console.log(request.method + " " + request.url);
+  var route = request.method + " " + request.url
 
-  switch (request.method + " " + request.url) {
+  console.log(route);
+
+  switch (route) {
 
     case "GET /":
     
@@ -192,10 +185,7 @@ module.exports = function(request,response) {
           users.create(body.email,body.password, function(error,user) {
 
             if (!error && user) {
-              console.log("Just registered someone... " + user);
-
               setUserCookie(response, user, function(error,response) {
-
                 if(error) return console.log("Couldn't set user cookie: " + error);
                 else redirectTo(response,routes.dashboard,"/dashboard");
               });
