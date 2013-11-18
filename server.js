@@ -6,7 +6,7 @@ var loadView = function(page) {
   
   var file = fs.readFileSync(page);
 
-  console.log('loaded ' + page)
+  console.log('loaded ' + page);
 
   return file;
 }
@@ -53,20 +53,17 @@ var validCookie = function(request) {
 
 var listener = function(request,response) {
 
-  switch (request.url) {
-    case "/":
+  switch (request.method + " " + request.url) {
+    case "GET /":
       authorized(request,response,pages.landing);
       break;
-    case "/login":
-
-      console.log("method was: " + request.method);
-
-      if (request.method == "GET")
-        authorized(request,response,pages.login);
-      else
-        authorized(request,setUserCookie(response),pages.dashboard);
+    case "GET /login":
+      authorized(request,response,pages.login);
       break;
-    case "/dashboard":
+    case "POST /login":
+      authorized(request,setUserCookie(response),pages.dashboard);
+      break;
+    case "GET /dashboard":
 
       if (validCookie(request))
         authorized(request,response,pages.dashboard);
