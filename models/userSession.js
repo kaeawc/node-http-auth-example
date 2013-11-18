@@ -54,24 +54,32 @@ var getByEmail = function(email, callback) {
   });
 }
 
-var create = function(email, token, callback) {
+var create = function(email, callback) {
 
   var hash = "user:" + email + ":session";
 
-  createSalt(function(salt) {
+  createSalt(function(token) {
+    createSalt(function(salt) {
 
-    useSalt(token,salt,function(error, hashedPassword) {
+      useSalt(token,salt,function(error, hashedPassword) {
 
-      var userSession = {
-        'email'    : email,
-        'salt'     : salt,
-        'token'    : hashedPassword.toString('hex')
-      };
+        var privateSession = {
+          'email'    : email,
+          'salt'     : salt,
+          'token'    : hashedPassword.toString('hex')
+        };
 
-      redis.set(hash, JSON.stringify(userSession), function(error, data) {
-        callback(error,data);
+        var publicSession = {
+          'email' : email,
+          'token' : token
+        }
+
+
+        redis.set(hash, JSON.stringify(privateSession), function(error, data) {
+          callback(error,publicSession);
+        });
+
       });
-
     });
   });
 }

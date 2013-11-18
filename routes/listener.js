@@ -2,6 +2,8 @@ var qs = require('querystring');
 
 var users = require('./../models/user');
 
+var sessions = require('./../models/userSession');
+
 var userCookieKey = "user";
 
 var routes = require('../routes');
@@ -24,13 +26,12 @@ var redirectTo = function(response,page,url) {
 
   response.writeHead(303, {"Location":url});
 
-
   response.end(page);
 
 }
 
 /**
- * Writes an authentication cookie to the given response
+ * Writes a cookie to the given response
  * @param  {Response}  response The response for which the cookie will be set
  * @param  {String}    key      String: The key to set
  * @param  {String}    value    String: The value to set
@@ -40,7 +41,7 @@ var redirectTo = function(response,page,url) {
  * @param  {String}    path     String: Optional resource path on domain.  Defaults to entire domain.
  * @return {Response}
  */
-var setUserCookie = function(response,key,value,expires,http,isSecure,path) {
+var setCookie = function(response,key,value,expires,http,isSecure,path) {
 
   var cookie = key + "=" + value;
 
@@ -65,6 +66,29 @@ var setUserCookie = function(response,key,value,expires,http,isSecure,path) {
   response.setHeader("Set-Cookie", [cookie]);
 
   return response;
+}
+
+var setUserCookie = function(response,user,callback) {
+
+  sessions.create(user.email, function(error, session) {
+    
+    if (error)
+      callback(error,false)
+    else {
+
+      var output = setCookie(response,userCookieKey,JSON.stringify(session),true,true);
+
+      callback(false, output);
+    }
+  });
+}
+
+var readUserCookie = function(request, callback) {
+
+  if(validCookie(request))
+    callback(false,JSON.parse(request.headers.cookie).email)
+  else
+    callback("Request did not have a valid cookie.",false)
 }
 
 /**
@@ -100,17 +124,13 @@ var internalError = function(request,response) {
 /**
  * Check if a cookie exists and if it is valid.
  */
-var validCookie = function(request, callback) {
+var validCookie = function(request) {
 
-  if (
+  return (
     request.headers &&
     request.headers.cookie &&
     request.headers.cookie.substring(0,5) == (userCookieKey + "=")
-  ) {
-    callback(false, true);
-  } else {
-    callback("The request headers do not contain a valid user cookie.", false);
-  }
+  )
 }
 
 /**
@@ -162,10 +182,12 @@ module.exports = function(request,response) {
 
           users.create(body.email,body.password, function(error,user) {
 
-            if (error) return console.log("Couldn't create user: " + error);
+            if (!error && user)
+              setUserCookie(response,user, function(error,response) {
 
-            if (user)
-              redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
+                if(error) return console.log("Couldn't set user cookie: " + error);
+                else redirectTo(response,routes.dashboard,"/dashboard");
+              });
             else
               internalError(request,response,routes.register);            
           });
@@ -186,7 +208,11 @@ module.exports = function(request,response) {
         users.authenticate(body.email,body.password, function(error,user) {
 
           if (!error && user)
-            redirectTo(setUserCookie(response,userCookieKey,user.email,true,true),routes.dashboard,"/dashboard");
+            setUserCookie(response,user, function(error,response) {
+
+              if(error) return console.log("Couldn't set user cookie: " + error);
+              else redirectTo(response,routes.dashboard,"/dashboard");
+            });
           else
             deny(response);
 
@@ -195,7 +221,7 @@ module.exports = function(request,response) {
 
       break;
     case "GET /dashboard":
-      validCookie(request, function(error,valid) {
+      readUserCookie(request, function(error,valid) {
         if(valid) 
           ok(request,response,routes.dashboard);
         else
