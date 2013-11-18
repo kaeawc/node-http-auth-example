@@ -8,6 +8,13 @@ redis.on("error", function (msg) {
   console.log("Redis Error: " + msg);
 });
 
+var password = process.env.REDIS_PASSWORD || false;
+
+if(password)
+  redis.auth(password, function() {
+    console.log("Connected, ready to query.");
+  });
+
 var createSalt = function(callback) {
   crypto.randomBytes(4096, function(error, salt) {
 

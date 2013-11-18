@@ -8,6 +8,13 @@ redis.on("error", function (msg) {
   console.log("Redis Error: " + msg);
 });
 
+var password = process.env.REDIS_PASSWORD || false;
+
+if(password)
+  redis.auth(password, function() {
+    console.log("Connected, ready to query.");
+  });
+
 var del = function(email, callback) {
   var hash = "user:" + email;
 
