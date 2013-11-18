@@ -3,11 +3,12 @@ var http = require('http');
 var fs = require('fs');
 
 var loadView = function(page) {
-
-  console.log("loadView");
   
-  fs.readFileSync(page);
+  var file = fs.readFileSync(page);
+
   console.log('loaded ' + page)
+
+  return file;
 }
 
 var pages = {
@@ -21,9 +22,6 @@ var pages = {
 
 var authorized = function(request,response,page) {
 
-  console.log("authorized");
-  
-
   console.log("authorized to view " + request.url);
 
   response.writeHead(200, {});
@@ -32,10 +30,13 @@ var authorized = function(request,response,page) {
 
 }
 
-var unauthorized = function(request,response) {
+var setUserCookie = function(response,user) {
+  response.setHeader("Set-Cookie", ["user=" + user]);
 
-  console.log("unauthorized");
-  
+  return response;
+}
+
+var unauthorized = function(request,response) {
 
   console.log("unauthorized to view " + request.url);
 
@@ -46,23 +47,24 @@ var unauthorized = function(request,response) {
 }
 
 var validCookie = function(request) {
-
-  console.log("validCookie");
   
   return (request.headers && request.headers.cookie);
 }
 
 var listener = function(request,response) {
 
-  console.log("listener");
-  
-
   switch (request.url) {
     case "/":
       authorized(request,response,pages.landing);
       break;
     case "/login":
-      authorized(request,response,pages.login);
+
+      console.log("method was: " + request.method);
+
+      if (request.method == "GET")
+        authorized(request,response,pages.login);
+      else
+        authorized(request,setUserCookie(response),pages.dashboard);
       break;
     case "/dashboard":
 
