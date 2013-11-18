@@ -1,12 +1,9 @@
 var crypt = require('crypto');
 
-var secret = require('../config').application.secret
-
-if (!secret)
-  secret = {
-    key: process.env.SECRET_KEY,
-    iv: process.env.SECRET_IV
-  };
+var secret = {
+  key: process.env.SECRET_KEY || require('../config').application.secret.key,
+  iv: process.env.SECRET_IV || require('../config').application.secret.iv
+};
 
 var createSalt = function(callback) {
   crypt.randomBytes(256, function(error, salt) {
