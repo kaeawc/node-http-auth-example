@@ -38,6 +38,10 @@ var dashboard = function(response) {
 
 }
 
+var validCookie = function(request) {
+  return (request.headers && request.headers.cookie);
+}
+
 var listener = function(request,response) {
 
   switch (request.url) {
@@ -46,11 +50,11 @@ var listener = function(request,response) {
       break;
     case "/dashboard":
 
-      if (request.headers && request.headers.cookie)
+      if (validCookie(request))
         authorized(request,response,pages.dashboard);
       else
         unauthorized(request,response);
-      
+
       break;
     default:
       unauthorized(request,response);
