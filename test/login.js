@@ -5,33 +5,33 @@ var http = require('http');
 describe('login', function() {
 
   var loginData = querystring.stringify({
-    "email": "asdf",
-    "password": "asdf"
+    'email': 'asdf',
+    'password': 'asdf'
   });
 
   var missingData = querystring.stringify({
-    "email": ""
+    'email': ''
   });
 
   var loginOptions = {
-    port: 8000,
-    hostname: 'localhost',
-    method: 'POST',
-    path: '/login',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': loginData.length
+    port     : 8000,
+    hostname : 'localhost',
+    method   : 'POST',
+    path     : '/login',
+    headers  : {
+      'Content-Type'   : 'application/x-www-form-urlencoded',
+      'Content-Length' : loginData.length
     }
   };
 
   var missingOptions = {
-    port: 8000,
-    hostname: 'localhost',
-    method: 'POST',
-    path: '/login',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': missingData.length
+    port     : 8000,
+    hostname : 'localhost',
+    method   : 'POST',
+    path     : '/login',
+    headers  : {
+      'Content-Type'   : 'application/x-www-form-urlencoded',
+      'Content-Length' : missingData.length
     }
   };
 
@@ -54,5 +54,4 @@ describe('login', function() {
       }
     ).write(missingData);
   });
-
 });

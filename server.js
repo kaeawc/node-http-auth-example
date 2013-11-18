@@ -116,8 +116,6 @@ var listener = function(request,response) {
 
       getRequestBody(request, function(body) {
 
-        console.log(body);
-
         if (body.email == "asdf" && body.password == "asdf")
           redirectTo(setUserCookie(response,userCookieKey,testUser,true,true),pages.dashboard);
         else
