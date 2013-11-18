@@ -21,12 +21,12 @@ var createSalt = function(callback) {
   });
 }
 
-var useSalt = function(password, salt, callback) {
-  crypto.pbkdf2(new Buffer(password, 'hex'),new Buffer(salt, 'hex'),1000,256,callback);
+var useSalt = function(token, salt, callback) {
+  crypto.pbkdf2(new Buffer(token, 'hex'),new Buffer(salt, 'hex'),1000,256,callback);
 }
 
 var del = function(email, callback) {
-  var hash = "user:" + email;
+  var hash = "user:" + email + ":session";
 
   redis.get(hash, function(error, data) {
     if(error)
@@ -38,7 +38,7 @@ var del = function(email, callback) {
 
 var getByEmail = function(email, callback) {
 
-  var hash = "user:" + email
+  var hash = "user:" + email + ":session";
 
   redis.get(hash, function(error, data) {
 
@@ -48,27 +48,27 @@ var getByEmail = function(email, callback) {
       if(data)
         callback(false,JSON.parse(data));
       else {
-        callback("No such user found.",false);
+        callback("No such user session found.",false);
       }
     }
   });
 }
 
-var create = function(email, password, callback) {
+var create = function(email, token, callback) {
 
-  var hash = "user:" + email
+  var hash = "user:" + email + ":session";
 
   createSalt(function(salt) {
 
-    useSalt(password,salt,function(error, hashedPassword) {
+    useSalt(token,salt,function(error, hashedPassword) {
 
-      var user = {
+      var userSession = {
         'email'    : email,
         'salt'     : salt,
-        'password' : hashedPassword.toString('hex')
+        'token'    : hashedPassword.toString('hex')
       };
 
-      redis.set(hash, JSON.stringify(user), function(error, data) {
+      redis.set(hash, JSON.stringify(userSession), function(error, data) {
         callback(error,data);
       });
 
@@ -76,24 +76,24 @@ var create = function(email, password, callback) {
   });
 }
 
-var authenticate = function(email, password, callback) {
+var authenticate = function(email, token, callback) {
 
-  getByEmail(email, function(error,user) {
+  getByEmail(email, function(error,userSession) {
 
     if (error) return callback(error,false);
 
-    if (user && user.password && user.salt) {
-      useSalt(password,user.salt, function(error, hashedPassword) {
+    if (userSession && userSession.token && userSession.salt) {
+      useSalt(token,userSession.salt, function(error, hashedPassword) {
 
         if (error) return callback(error,false);
 
-        if (user.password == hashedPassword.toString('hex'))
-          callback(error,user);
+        if (userSession.token == hashedPassword.toString('hex'))
+          callback(error,userSession);
         else
-          callback("The given password is not correct.",false);
+          callback("The given token is not correct.",false);
       });
     } else
-      callback("The user object was not properly formed.",false);
+      callback("The userSession object was not properly formed.",false);
 
   });
 }

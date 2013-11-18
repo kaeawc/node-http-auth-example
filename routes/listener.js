@@ -102,13 +102,17 @@ var internalError = function(request,response) {
 /**
  * Check if a cookie exists and if it is valid.
  */
-var validCookie = function(request) {
+var validCookie = function(request, callback) {
 
-  return (
+  if (
     request.headers &&
     request.headers.cookie &&
     request.headers.cookie.substring(0,5) == (userCookieKey + "=")
-  );
+  ) {
+    callback(false, true);
+  } else {
+    callback("The request headers do not contain a valid user cookie.", false);
+  }
 }
 
 /**
@@ -133,7 +137,7 @@ var getRequestBody = function(request,callback) {
 
 module.exports = function(request,response) {
 
-  console.log(new Date() + " " + request.method + " " + request.url);
+  console.log(request.method + " " + request.url);
 
   switch (request.method + " " + request.url) {
 
@@ -183,29 +187,22 @@ module.exports = function(request,response) {
 
         users.authenticate(body.email,body.password, function(error,user) {
 
-          if (!error && user) {
-
-            console.log("Authenticated User " + user.email)
-
+          if (!error && user)
             redirectTo(setUserCookie(response,userCookieKey,user.email,true,true),routes.dashboard,"/dashboard");
-          }
-          else {
-
-            console.log("Couldn't authenticate user: " + error);
-
+          else
             deny(response);
-          }
+
         });
       });
 
       break;
     case "GET /dashboard":
-
-      if (validCookie(request))
-        ok(request,response,routes.dashboard);
-      else
-        deny(response);
-
+      validCookie(request, function(error,valid) {
+        if(valid) 
+          ok(request,response,routes.dashboard);
+        else
+          deny(response);
+      });
       break;
     default:
       deny(response);
