@@ -8,6 +8,8 @@ var userCookieKey = "user";
 
 var testUser = 2314;
 
+var port = 8000;
+
 var authorized = function(request,response,page) {
 
   response.writeHead(200, {});
@@ -120,4 +122,6 @@ var listener = function(request,response) {
 
 var server = http.createServer(listener);
 
-server.listen(8000);
+server.listen(port);
+
+console.log("Server listening on port " + port)
