@@ -76,8 +76,6 @@ var deny = function(response) {
 
   response.end(routes.error.unauthorized);
 
-  console.log("Sent Unauthorized to User");
-
 }
 
 /**
