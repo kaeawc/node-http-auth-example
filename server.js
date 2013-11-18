@@ -42,15 +42,15 @@ var listener = function(request,response) {
 
   switch (request.url) {
     case "/":
-        authorized(request,response,pages.landing);
+      authorized(request,response,pages.landing);
       break;
     case "/dashboard":
 
-        if (request.headers && request.headers.cookie) {
-          authorized(request,response,pages.dashboard);
-        } else {
-          unauthorized(request,response);
-        }
+      if (request.headers && request.headers.cookie)
+        authorized(request,response,pages.dashboard);
+      else
+        unauthorized(request,response);
+      
       break;
     default:
       unauthorized(request,response);
