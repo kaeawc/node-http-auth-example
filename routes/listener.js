@@ -69,11 +69,30 @@ var setUserCookie = function(response,key,value,expires,http,isSecure,path) {
 /**
  * Render the Unauthorized error page.
  */
-var unauthorized = function(request,response) {
+var deny = function(request,response) {
 
   response.writeHead(401, {});
 
   response.end(routes.error.unauthorized);
+
+}
+
+/**
+ * Render the Unauthorized error page.
+ */
+var bad = function(request,response,page) {
+
+  response.writeHead(400, {});
+
+  response.end(page);
+
+}
+
+var internalError = function(request,response) {
+
+  response.writeHead(500, {});
+
+  response.end(routes.error.internal);
 
 }
 
@@ -117,6 +136,31 @@ module.exports = function(request,response) {
     case "GET /":
       ok(request,response,routes.landing);
       break;
+    case "GET /register":
+      ok(request,response,routes.register);
+      break;
+    case "POST /register":
+
+      getRequestBody(request, function(body) {
+
+        if (
+          body.email.indexOf("@") > 0 &&
+          body.email.length > 3 &&
+          body.password == body.retypedPassword &&
+          body.password.length > 6  
+        ) {
+
+          var user = users.create(body.email,body.password)
+
+          if (user)
+            redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard);
+          else
+            internalError(request,response,routes.register);
+        } else
+          bad(request,response,routes.register);
+      });
+
+      break;
     case "GET /login":
       ok(request,response,routes.login);
       break;
@@ -129,7 +173,7 @@ module.exports = function(request,response) {
         if (user)
           redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard);
         else
-          unauthorized(request,response);
+          deny(request,response);
       });
 
       break;
@@ -138,11 +182,11 @@ module.exports = function(request,response) {
       if (validCookie(request))
         ok(request,response,routes.dashboard);
       else
-        unauthorized(request,response);
+        deny(request,response);
 
       break;
     default:
-      unauthorized(request,response);
+      deny(request,response);
       break;
   }
 }

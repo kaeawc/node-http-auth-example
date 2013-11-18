@@ -1,4 +1,6 @@
 
 
 local:
-	mocha
+	mocha test/routes
+	mocha test/login
+	mocha test/register
