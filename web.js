@@ -1,3 +1,4 @@
+console.log("Starting up web server...");
 
 var http = require('http');
 
@@ -7,7 +8,7 @@ var config = require('./config');
 
 var port = process.env.HTTP_PORT || config.server.port;
 
-var listener = require('./routes/listener')
+var listener = require('./routes/listener');
 
 var server = http.createServer(listener);
 
