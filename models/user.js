@@ -1,25 +1,59 @@
+config = require('../config');
+
+var redis = require('redis').createClient(config.redis.port, config.redis.host);
+
+redis.on("error", function (msg) {
+  console.log("Redis Error: " + msg);
+});
 
 var testUser = {
   id    : 2314,
   email : "test@example.com"
 }
 
-exports.getById = function(id) {
+var createSalt = function() {
+
+}
+
+var useSalt = function(password, salt) {
+  return "asdfasdf"
+}
+
+exports.getByEmail = function(email, callback) {
+
+  var hash = "user:" + email
+
+  redis.get(hash, function(error, data) {
+    callback(data);
+  });
+}
+
+exports.create = function(email, password, callback) {
+
+  var hash = email
+  var salt = createSalt();
+  var user = {
+    'email'    : email,
+    'password' : useSalt(password,salt)
+  }
+
+  redis.set(hash, function(error, data) {
+    callback(error,data);
+  });
+
   return testUser;
 }
 
-exports.getByEmail = function(email) {
-  return testUser;
-}
+exports.authenticate = function(email, password, callback) {
 
-exports.create = function(email,password) {
-  return testUser;
-}
+  getByEmail(email, function(error,user) {
 
-exports.authenticate = function(email,password) {
+    if (error) return;
 
-  if(email == "test@example.com" && password == "areallybadpassword")
-    return testUser;
-  else
-    return false;
+    if (user && user.password && user.password == useSalt(password,user.salt)) {
+      callback(user);
+    } else {
+      callback(false);
+    }
+  });
 }

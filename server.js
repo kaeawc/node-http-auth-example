@@ -3,7 +3,9 @@ var http = require('http');
 
 var routes = require('./routes');
 
-var port = 8000;
+var config = require('./config');
+
+var port = config.server.port;
 
 var listener = require('./routes/listener')
 
