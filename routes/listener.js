@@ -4,6 +4,8 @@ var users = require('./../models/user');
 
 var sessions = require('./../models/userSession');
 
+var crypto = require('../crypto');
+
 var userCookieKey = "user";
 
 var routes = require('../routes');
@@ -11,7 +13,7 @@ var routes = require('../routes');
 /**
  * Render the given page with HTTP 200.
  */
-var ok = function(request,response,page) {
+var ok = function(response,page) {
 
   response.writeHead(200, {});
 
@@ -74,8 +76,12 @@ var setUserCookie = function(response,user,callback) {
     
     if (error)
       callback(error,false)
-    else
-      callback(false, setCookie(response,userCookieKey,JSON.stringify(session),true,true));
+    else {
+
+      var enc = crypto.encrypt(JSON.stringify(session));
+
+      callback(false, setCookie(response,userCookieKey,enc,true,true));
+    }
   });
 }
 
@@ -83,9 +89,14 @@ var readUserCookie = function(request, callback) {
 
   if(validCookie(request)) {
 
-    var value = request.headers.cookie.substring(5,request.headers.cookie.length);
+    var enc = request.headers.cookie.substring(5,request.headers.cookie.length);
 
-    callback(false,JSON.parse(value).email)
+    var session = JSON.parse(crypto.decrypt(enc))
+
+    sessions.authenticate(session.email, session.token, function(error, data) {
+      if(error) console.log("Failed to authenticate cookie session: " + error);
+      else callback(false,session);
+    });
   }
   else
     callback("Request did not have a valid cookie.",false)
@@ -105,7 +116,7 @@ var deny = function(response) {
 /**
  * Render the Unauthorized error page.
  */
-var bad = function(request,response,page) {
+var bad = function(response,page) {
 
   response.writeHead(400, {});
 
@@ -113,11 +124,11 @@ var bad = function(request,response,page) {
 
 }
 
-var internalError = function(request,response) {
+var internalError = function(response,page) {
 
   response.writeHead(500, {});
 
-  response.end(routes.error.internal);
+  response.end(page);
 
 }
 
@@ -163,12 +174,12 @@ module.exports = function(request,response) {
 
     case "GET /":
     
-      ok(request,response,routes.landing);
+      ok(response,routes.landing);
       break;
 
     case "GET /register":
 
-      ok(request,response,routes.register);
+      ok(response,routes.register);
       break;
 
     case "POST /register":
@@ -186,23 +197,24 @@ module.exports = function(request,response) {
 
             if (!error && user) {
               setUserCookie(response, user, function(error,response) {
-                if(error) return console.log("Couldn't set user cookie: " + error);
+                if(error) deny(response);
                 else redirectTo(response,routes.dashboard,"/dashboard");
               });
             }
             else
-              internalError(request,response,routes.register);            
+              internalError(response,routes.register);            
           });
 
         } else
-          bad(request,response,routes.register);
+          bad(response,routes.register);
       });
 
       break;
     case "GET /login":
 
-      ok(request,response,routes.login);
+      ok(response,routes.login);
       break;
+
     case "POST /login":
 
       getRequestBody(request, function(body) {
@@ -212,7 +224,7 @@ module.exports = function(request,response) {
           if (!error && user)
             setUserCookie(response, user, function(error,response) {
 
-              if(error) return console.log("Couldn't set user cookie: " + error);
+              if(error) deny(response);
               else redirectTo(response,routes.dashboard,"/dashboard");
             });
           else
@@ -222,15 +234,22 @@ module.exports = function(request,response) {
       });
 
       break;
+
     case "GET /dashboard":
+
       readUserCookie(request, function(error,valid) {
+
         if(valid) 
-          ok(request,response,routes.dashboard);
+          ok(response,routes.dashboard);
         else
           deny(response);
+
       });
+
       break;
+
     default:
+
       deny(response);
       break;
   }
