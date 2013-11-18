@@ -1,4 +1,4 @@
-crypto = require('crypto');
+crypto = require('../crypto');
 
 config = require('../config');
 
@@ -13,17 +13,6 @@ var testUser = {
   email : "test@example.com"
 }
 
-var createSalt = function(callback) {
-  crypto.randomBytes(4096, function(error, salt) {
-
-    if (error) console.log("Failed make random bytes.")
-    else callback(salt.toString('hex'));
-  });
-}
-
-var useSalt = function(password, salt, callback) {
-  crypto.pbkdf2(new Buffer(password, 'hex'),new Buffer(salt, 'hex'),1000,4096,callback);
-}
 
 var del = function(email, callback) {
   var hash = "user:" + email;
@@ -58,9 +47,9 @@ var create = function(email, password, callback) {
 
   var hash = "user:" + email
 
-  createSalt(function(salt) {
+  crypto.createSalt(function(salt) {
 
-    useSalt(password,salt,function(error, hashedPassword) {
+    crypto.useSalt(password,salt,function(error, hashedPassword) {
 
       var user = {
         'email'    : email,
@@ -86,7 +75,7 @@ var authenticate = function(email, password, callback) {
     if (error) return callback(error,false);
 
     if (user && user.password && user.salt) {
-      useSalt(password,user.salt, function(error, hashedPassword) {
+      crypto.useSalt(password,user.salt, function(error, hashedPassword) {
 
         if (error) return callback(error,false);
 

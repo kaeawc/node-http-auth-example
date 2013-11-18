@@ -1,4 +1,4 @@
-crypto = require('crypto');
+crypto = require('../crypto');
 
 config = require('../config');
 
@@ -53,10 +53,10 @@ var create = function(email, callback) {
 
   var hash = "user:" + email + ":session";
 
-  createSalt(function(token) {
-    createSalt(function(salt) {
+  crypto.createSalt(function(token) {
+    crypto.createSalt(function(salt) {
 
-      useSalt(token,salt,function(error, hashedPassword) {
+      crypto.useSalt(token,salt,function(error, hashedPassword) {
 
         var privateSession = {
           'email'    : email,
@@ -68,12 +68,6 @@ var create = function(email, callback) {
           'email' : email,
           'token' : token
         }
-
-        console.log("make private session: ");
-        console.log(privateSession);
-        console.log("make public session: ");
-        console.log(publicSession);
-
 
         redis.set(hash, JSON.stringify(privateSession), function(error, data) {
           callback(error,publicSession);
@@ -91,7 +85,7 @@ var authenticate = function(email, token, callback) {
     if (error) return callback(error,false);
 
     if (userSession && userSession.token && userSession.salt) {
-      useSalt(token,userSession.salt, function(error, hashedPassword) {
+      crypto.useSalt(token,userSession.salt, function(error, hashedPassword) {
 
         if (error) return callback(error,false);
 
