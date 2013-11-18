@@ -12,48 +12,67 @@ var testUser = {
 }
 
 var createSalt = function() {
-
+  return "fdsafdsa";
 }
 
 var useSalt = function(password, salt) {
-  return "asdfasdf"
+  return "asdfasdf";
 }
 
-exports.getByEmail = function(email, callback) {
+var getByEmail = function(email, callback) {
 
   var hash = "user:" + email
 
   redis.get(hash, function(error, data) {
-    callback(data);
+
+    if(error)
+      callback(error,false);
+    else {
+      if(data)
+        callback(false,JSON.parse(data));
+      else {
+        callback("No such user found.",false);
+      }
+    }
   });
 }
 
-exports.create = function(email, password, callback) {
+var create = function(email, password, callback) {
 
-  var hash = email
+  var hash = "user:" + email
   var salt = createSalt();
   var user = {
     'email'    : email,
     'password' : useSalt(password,salt)
   }
 
-  redis.set(hash, function(error, data) {
+  redis.set(hash, JSON.stringify(user), function(error, data) {
     callback(error,data);
   });
 
   return testUser;
 }
 
-exports.authenticate = function(email, password, callback) {
+var authenticate = function(email, password, callback) {
+
+  console.log("Attempting to authenticate " + email + " with password " + password)
 
   getByEmail(email, function(error,user) {
 
-    if (error) return;
+    if (error) return callback(error,false);
 
-    if (user && user.password && user.password == useSalt(password,user.salt)) {
-      callback(user);
-    } else {
-      callback(false);
-    }
+    if (
+      user &&
+      user.password &&
+      user.password == useSalt(password,user.salt)
+    )
+      callback(error,user);
+    else
+      callback(error,false);
+
   });
 }
+
+exports.getByEmail   = getByEmail
+exports.create       = create
+exports.authenticate = authenticate

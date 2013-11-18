@@ -5,8 +5,8 @@ var http = require('http');
 describe('login', function() {
 
   var loginData = querystring.stringify({
-    'email': 'test@example.com',
-    'password': 'areallybadpassword'
+    'email'    : 'test@example.com',
+    'password' : 'areallybadpassword'
   });
 
   var missingData = querystring.stringify({

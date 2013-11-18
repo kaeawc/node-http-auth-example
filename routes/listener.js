@@ -156,12 +156,16 @@ module.exports = function(request,response) {
           body.password.length > 6  
         ) {
 
-          var user = users.create(body.email,body.password);
+          users.create(body.email,body.password, function(error,user) {
 
-          if (user)
-            redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
-          else
-            internalError(request,response,routes.register);
+            if (error) return console.log("Couldn't create user: " + error);
+
+            if (user)
+              redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
+            else
+              internalError(request,response,routes.register);            
+          });
+
         } else
           bad(request,response,routes.register);
       });
@@ -175,12 +179,16 @@ module.exports = function(request,response) {
 
       getRequestBody(request, function(body) {
 
-        var user = users.authenticate(body.email,body.password)
+        users.authenticate(body.email,body.password, function(error,user) {
 
-        if (user)
-          redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
-        else
-          deny(request,response);
+          if (error) return console.log("Couldn't authenticate user: " + error);
+
+          if (user)
+            redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
+          else
+            deny(request,response);
+
+        });
       });
 
       break;
