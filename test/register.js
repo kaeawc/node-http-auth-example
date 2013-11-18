@@ -37,6 +37,9 @@ describe('register', function() {
   };
 
   it('register when given valid user credentials', function(done) {
+
+    this.timeout(5000);
+    
     http.request(
       registerOptions,
       function(response) { 

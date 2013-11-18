@@ -36,6 +36,9 @@ describe('login', function() {
   };
 
   it('login when given valid user credentials', function(done) {
+
+    this.timeout(5000);
+
     http.request(
       loginOptions,
       function(response) { 

@@ -30,4 +30,13 @@ describe('routes', function() {
       });
   });
 
+  it('should render the register page on request', function(done) {
+    http.get(
+      'http://localhost:8000/register',
+      function(response) {
+        assert.equal(response.statusCode, 200);
+        done();
+      });
+  });
+
 });

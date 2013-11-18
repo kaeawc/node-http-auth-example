@@ -9,7 +9,7 @@ redis.on("error", function (msg) {
 });
 
 var createSalt = function(callback) {
-  crypto.randomBytes(256, function(error, salt) {
+  crypto.randomBytes(4096, function(error, salt) {
 
     if (error) console.log("Failed make random bytes.")
     else callback(salt.toString('hex'));
@@ -17,7 +17,7 @@ var createSalt = function(callback) {
 }
 
 var useSalt = function(token, salt, callback) {
-  crypto.pbkdf2(new Buffer(token, 'hex'),new Buffer(salt, 'hex'),1000,256,callback);
+  crypto.pbkdf2(new Buffer(token, 'hex'),new Buffer(salt, 'hex'),1000,4096,callback);
 }
 
 var del = function(email, callback) {
