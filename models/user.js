@@ -69,7 +69,10 @@ var create = function(email, password, callback) {
       };
 
       redis.set(hash, JSON.stringify(user), function(error, data) {
-        callback(error,data);
+        if (error)
+          callback(error, false);
+        else
+          getByEmail(email, callback);
       });
 
     });

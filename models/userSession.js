@@ -8,11 +8,6 @@ redis.on("error", function (msg) {
   console.log("Redis Error: " + msg);
 });
 
-var testUser = {
-  id    : 2314,
-  email : "test@example.com"
-}
-
 var createSalt = function(callback) {
   crypto.randomBytes(256, function(error, salt) {
 
@@ -73,6 +68,11 @@ var create = function(email, callback) {
           'email' : email,
           'token' : token
         }
+
+        console.log("make private session: ");
+        console.log(privateSession);
+        console.log("make public session: ");
+        console.log(publicSession);
 
 
         redis.set(hash, JSON.stringify(privateSession), function(error, data) {

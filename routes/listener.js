@@ -70,11 +70,16 @@ var setCookie = function(response,key,value,expires,http,isSecure,path) {
 
 var setUserCookie = function(response,user,callback) {
 
+  console.log("creating session for " + user.email);
+
   sessions.create(user.email, function(error, session) {
     
     if (error)
       callback(error,false)
     else {
+
+      console.log("About to set user cookie:");
+      console.log(session);
 
       var output = setCookie(response,userCookieKey,JSON.stringify(session),true,true);
 
@@ -85,8 +90,12 @@ var setUserCookie = function(response,user,callback) {
 
 var readUserCookie = function(request, callback) {
 
-  if(validCookie(request))
-    callback(false,JSON.parse(request.headers.cookie).email)
+  if(validCookie(request)) {
+
+    var value = request.headers.cookie.substring(5,request.headers.cookie.length);
+
+    callback(false,JSON.parse(value).email)
+  }
   else
     callback("Request did not have a valid cookie.",false)
 }
@@ -182,12 +191,15 @@ module.exports = function(request,response) {
 
           users.create(body.email,body.password, function(error,user) {
 
-            if (!error && user)
-              setUserCookie(response,user, function(error,response) {
+            if (!error && user) {
+              console.log("Just registered someone... " + user);
+
+              setUserCookie(response, user, function(error,response) {
 
                 if(error) return console.log("Couldn't set user cookie: " + error);
                 else redirectTo(response,routes.dashboard,"/dashboard");
               });
+            }
             else
               internalError(request,response,routes.register);            
           });
@@ -208,7 +220,7 @@ module.exports = function(request,response) {
         users.authenticate(body.email,body.password, function(error,user) {
 
           if (!error && user)
-            setUserCookie(response,user, function(error,response) {
+            setUserCookie(response, user, function(error,response) {
 
               if(error) return console.log("Couldn't set user cookie: " + error);
               else redirectTo(response,routes.dashboard,"/dashboard");
