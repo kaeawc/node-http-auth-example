@@ -3,9 +3,9 @@
   "contributors": [
     "Jason Pearson <jason.d.pearson@gmail.com> (kaeawc.github.io)"
   ],
-  "name":"authentication-examples",
+  "name":"authentication-example",
   "version":"0.1",
   "description":"An http server that demonstrates going from scratch to high level encryption based on best practices.",
   "keywords":"auth encryption crypto",
-  "homepage":"https://github.com/kaeawc/node-auth-examples",
+  "homepage":"https://github.com/kaeawc/node-auth-example",
 }

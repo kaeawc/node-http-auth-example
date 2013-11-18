@@ -131,15 +131,20 @@ var getRequestBody = function(request,callback) {
 
 module.exports = function(request,response) {
 
-  console.log(new Date() + " " + request.method + " " + request.url)
+  console.log(new Date() + " " + request.method + " " + request.url);
 
   switch (request.method + " " + request.url) {
+
     case "GET /":
+    
       ok(request,response,routes.landing);
       break;
+
     case "GET /register":
+
       ok(request,response,routes.register);
       break;
+
     case "POST /register":
 
       getRequestBody(request, function(body) {
@@ -151,7 +156,7 @@ module.exports = function(request,response) {
           body.password.length > 6  
         ) {
 
-          var user = users.create(body.email,body.password)
+          var user = users.create(body.email,body.password);
 
           if (user)
             redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
@@ -163,6 +168,7 @@ module.exports = function(request,response) {
 
       break;
     case "GET /login":
+
       ok(request,response,routes.login);
       break;
     case "POST /login":

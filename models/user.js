@@ -1,7 +1,7 @@
 
 var testUser = {
-  id:2314,
-  email: "test@example.com"
+  id    : 2314,
+  email : "test@example.com"
 }
 
 exports.getById = function(id) {
