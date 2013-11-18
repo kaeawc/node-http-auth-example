@@ -2,29 +2,11 @@ var qs = require('querystring');
 
 var http = require('http');
 
-var fs = require('fs');
-
-var loadView = function(page) {
-  
-  var file = fs.readFileSync(page);
-
-  console.log('loaded ' + page);
-
-  return file;
-}
+var routes = require('./routes');
 
 var userCookieKey = "user";
 
 var testUser = 2314;
-
-var pages = {
-  landing : loadView('views/landing.html'),
-  login : loadView('views/login.html'),
-  dashboard : loadView('views/dashboard.html'),
-  error : {
-    unauthorized : loadView('views/error/unauthorized.html')
-  }
-}
 
 var authorized = function(request,response,page) {
 
@@ -39,7 +21,6 @@ var redirectTo = function(response,page,url) {
   response.writeHead(303, {"url":url});
 
   response.end(page);
-
 
 }
 
@@ -74,7 +55,7 @@ var unauthorized = function(request,response) {
 
   response.writeHead(401, {});
 
-  response.end(pages.error.unauthorized);
+  response.end(routes.error.unauthorized);
 
 }
 
@@ -107,17 +88,17 @@ var listener = function(request,response) {
 
   switch (request.method + " " + request.url) {
     case "GET /":
-      authorized(request,response,pages.landing);
+      authorized(request,response,routes.landing);
       break;
     case "GET /login":
-      authorized(request,response,pages.login);
+      authorized(request,response,routes.login);
       break;
     case "POST /login":
 
       getRequestBody(request, function(body) {
 
         if (body.email == "asdf" && body.password == "asdf")
-          redirectTo(setUserCookie(response,userCookieKey,testUser,true,true),pages.dashboard);
+          redirectTo(setUserCookie(response,userCookieKey,testUser,true,true),routes.dashboard);
         else
           unauthorized(request,response);
       });
@@ -126,7 +107,7 @@ var listener = function(request,response) {
     case "GET /dashboard":
 
       if (validCookie(request))
-        authorized(request,response,pages.dashboard);
+        authorized(request,response,routes.dashboard);
       else
         unauthorized(request,response);
 
