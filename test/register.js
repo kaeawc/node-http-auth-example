@@ -41,6 +41,7 @@ describe('register', function() {
       registerOptions,
       function(response) { 
         assert.equal(response.statusCode, 303);
+        assert.equal("/dashboard", response.headers.location);
         done();
       }
     ).write(registerData);

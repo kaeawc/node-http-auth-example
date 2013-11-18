@@ -22,7 +22,8 @@ var ok = function(request,response,page) {
  */
 var redirectTo = function(response,page,url) {
 
-  response.writeHead(303, {"url":url});
+  response.writeHead(303, {"Location":url});
+
 
   response.end(page);
 
@@ -153,7 +154,7 @@ module.exports = function(request,response) {
           var user = users.create(body.email,body.password)
 
           if (user)
-            redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard);
+            redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
           else
             internalError(request,response,routes.register);
         } else
@@ -171,7 +172,7 @@ module.exports = function(request,response) {
         var user = users.authenticate(body.email,body.password)
 
         if (user)
-          redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard);
+          redirectTo(setUserCookie(response,userCookieKey,user.id,true,true),routes.dashboard,"/dashboard");
         else
           deny(request,response);
       });

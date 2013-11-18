@@ -39,7 +39,9 @@ describe('login', function() {
     http.request(
       loginOptions,
       function(response) { 
+
         assert.equal(response.statusCode, 303);
+        assert.equal("/dashboard", response.headers.location);
         done();
       }
     ).write(loginData);
