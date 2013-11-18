@@ -1,9 +1,7 @@
 var crypto = require('../crypto');
 
-var config = require('../config');
-
-var port = process.env.REDIS_PORT || config.redis.port;
-var host = process.env.REDIS_HOST || config.redis.host;
+var port = process.env.REDIS_PORT || require('../config').redis.port;
+var host = process.env.REDIS_HOST || require('../config').redis.host;
 var redis = require('redis').createClient(port, host);
 
 redis.on("error", function (msg) {
