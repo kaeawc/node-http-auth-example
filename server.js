@@ -5,7 +5,7 @@ var routes = require('./routes');
 
 var config = require('./config');
 
-var port = config.server.port;
+var port = process.env.HTTP_PORT || config.server.port;
 
 var listener = require('./routes/listener')
 

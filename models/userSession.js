@@ -1,8 +1,10 @@
-crypto = require('../crypto');
+var crypto = require('../crypto');
 
-config = require('../config');
+var config = require('../config');
 
-var redis = require('redis').createClient(config.redis.port, config.redis.host);
+var port = process.env.REDIS_PORT || config.redis.port;
+var host = process.env.REDIS_HOST || config.redis.host;
+var redis = require('redis').createClient(port, host);
 
 redis.on("error", function (msg) {
   console.log("Redis Error: " + msg);
