@@ -13,7 +13,7 @@ redis.on("error", function (msg) {
 var del = function(email, callback) {
   var hash = "user:" + email;
 
-  redis.get(hash, function(error, data) {
+  redis.del(hash, function(error, data) {
     if(error)
       callback(error,false);
     else
