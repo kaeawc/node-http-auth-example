@@ -10,25 +10,19 @@ var pages = {
   }
 }
 
-var listener = function(request,response) {
+var authorized = function(request,response,page) {
 
-  if (authorized(request)) {
+  console.log("authorized to view " + request.url);
 
-    console.log("authorized to view " + request.url);
+  response.writeHead(200, {});
 
-    response.writeHead(200, {});
+  response.end(page);
 
-    response.end(pages.landing);
-
-  } else {
-
-    console.log("unauthorized to view " + request.url);
-
-    unauthorized(response);
-  }
 }
 
-var unauthorized = function(response) {
+var unauthorized = function(request,response) {
+
+  console.log("unauthorized to view " + request.url);
 
   response.writeHead(401, {});
 
@@ -44,17 +38,22 @@ var dashboard = function(response) {
 
 }
 
-var authorized = function(request) {
+var listener = function(request,response) {
 
   switch (request.url) {
     case "/":
-        return true;
+        authorized(request,response,pages.landing);
       break;
     case "/dashboard":
-        return false;
+
+        if (request.headers && request.headers.cookie) {
+
+        } else {
+          unauthorized(request,response);
+        }
       break;
     default:
-        return false;
+      unauthorized(request,response);
       break;
   }
 }
