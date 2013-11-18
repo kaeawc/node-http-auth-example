@@ -12,11 +12,9 @@ var pages = {
 
 var listener = function(request,response) {
 
-  console.log(request.url);
-
   if (authorized(request)) {
 
-    console.log("authorized");
+    console.log("authorized to view " + request.url);
 
     response.writeHead(200, {});
 
@@ -24,7 +22,7 @@ var listener = function(request,response) {
 
   } else {
 
-    console.log("unauthorized");
+    console.log("unauthorized to view " + request.url);
 
     unauthorized(response);
   }
@@ -48,8 +46,17 @@ var dashboard = function(response) {
 
 var authorized = function(request) {
 
-  return (request.url == "/");
-
+  switch (request.url) {
+    case "/":
+        return true;
+      break;
+    case "/dashboard":
+        return false;
+      break;
+    default:
+        return false;
+      break;
+  }
 }
 
 var server = http.createServer(listener);
