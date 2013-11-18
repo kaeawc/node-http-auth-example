@@ -4,7 +4,7 @@ var listener = function(request,response) {
 
   response.writeHead(200, {});
 
-  response.end('hello world');
+  response.end('<!doctype html><html><head></head><body>Hello World</body></html>');
 
 }
 
