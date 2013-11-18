@@ -10,7 +10,10 @@ var testUser = 2314;
 
 var port = 8000;
 
-var authorized = function(request,response,page) {
+/**
+ * Render the given page with HTTP 200.
+ */
+var ok = function(request,response,page) {
 
   response.writeHead(200, {});
 
@@ -18,6 +21,9 @@ var authorized = function(request,response,page) {
 
 }
 
+/**
+ * Redirect the to the given url.
+ */
 var redirectTo = function(response,page,url) {
 
   response.writeHead(303, {"url":url});
@@ -26,6 +32,17 @@ var redirectTo = function(response,page,url) {
 
 }
 
+/**
+ * Writes an authentication cookie to the given response
+ * @param  {Response}  response The response for which the cookie will be set
+ * @param  {String}    key      String: The key to set
+ * @param  {String}    value    String: The value to set
+ * @param  {Boolean}   expires  Boolean: if true, will expire in 1 year, otherwise will expire when the browser closes
+ * @param  {Boolean}   http     Boolean: if true, will only serve and accept this cookie over HTTP
+ * @param  {Boolean}   isSecure Boolean: if true, will only serve this cookie over SSL
+ * @param  {String}    path     String: Optional resource path on domain.  Defaults to entire domain.
+ * @return {Response}
+ */
 var setUserCookie = function(response,key,value,expires,http,isSecure,path) {
 
   var cookie = key + "=" + value;
@@ -53,6 +70,9 @@ var setUserCookie = function(response,key,value,expires,http,isSecure,path) {
   return response;
 }
 
+/**
+ * Render the Unauthorized error page.
+ */
 var unauthorized = function(request,response) {
 
   response.writeHead(401, {});
@@ -61,6 +81,9 @@ var unauthorized = function(request,response) {
 
 }
 
+/**
+ * Check if a cookie exists and if it is valid.
+ */
 var validCookie = function(request) {
 
   return (
@@ -70,6 +93,12 @@ var validCookie = function(request) {
   );
 }
 
+/**
+ * [ description]
+ * @param  {[type]}   request  [description]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
 var getRequestBody = function(request,callback) {
 
   var body = '';
@@ -90,10 +119,10 @@ var listener = function(request,response) {
 
   switch (request.method + " " + request.url) {
     case "GET /":
-      authorized(request,response,routes.landing);
+      ok(request,response,routes.landing);
       break;
     case "GET /login":
-      authorized(request,response,routes.login);
+      ok(request,response,routes.login);
       break;
     case "POST /login":
 
@@ -109,7 +138,7 @@ var listener = function(request,response) {
     case "GET /dashboard":
 
       if (validCookie(request))
-        authorized(request,response,routes.dashboard);
+        ok(request,response,routes.dashboard);
       else
         unauthorized(request,response);
 
